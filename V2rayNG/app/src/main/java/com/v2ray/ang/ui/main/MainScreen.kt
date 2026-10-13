@@ -1,19 +1,25 @@
 package com.v2ray.ang.ui.main
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -24,13 +30,25 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.v2ray.ang.AppConfig
 import com.v2ray.ang.dto.entities.ProfileItem
+import com.v2ray.ang.handler.MmkvManager
+import com.v2ray.ang.ui.branding.NearArt
 import com.v2ray.ang.ui.compose.LocalDarkTheme
 import com.v2ray.ang.ui.compose.QRCodeDialog
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
@@ -51,6 +69,27 @@ fun MainScreen(
     val shareQRCodeBitmap = uiState.shareQRCodeBitmap
 
     val isDarkTheme = LocalDarkTheme.current
+
+    // Home artwork state. Re-read on every resume so a wallpaper or mascot
+    // change made on the settings screen applies as soon as the user returns.
+    var homeArtTick by remember { mutableStateOf(0) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                homeArtTick++
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    val customWallpaperEnabled = remember(homeArtTick) {
+        MmkvManager.decodeSettingsBool(AppConfig.PREF_WALLPAPER_CUSTOM, false)
+    }
+    val showMascot = remember(homeArtTick) {
+        MmkvManager.decodeSettingsBool(AppConfig.PREF_SHOW_MASCOT, true)
+    }
+
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var showSearch by remember { mutableStateOf(false) }
@@ -149,7 +188,11 @@ fun MainScreen(
             )
         }
     ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            HomeBackground(customWallpaper = customWallpaperEnabled)
+
         Scaffold(
+            containerColor = Color.Transparent,
             contentWindowInsets = ScaffoldDefaults.contentWindowInsets,
             topBar = {
                 MainTopBar(
@@ -256,5 +299,76 @@ fun MainScreen(
                 }
             }
         }
+
+            if (showMascot) {
+                EmiliaMascot(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(start = 14.dp, bottom = 96.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeBackground(customWallpaper: Boolean) {
+    val context = LocalContext.current
+    val bitmap = if (customWallpaper) {
+        NearArt.customWallpaper(context) ?: NearArt.bgNight()
+    } else {
+        NearArt.bgNight()
+    }
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (bitmap != null) {
+            Image(
+                bitmap = bitmap,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF0A1030).copy(alpha = 0.42f))
+        )
+    }
+}
+
+private enum class EmiliaFrame { OPEN, BLINK, SMILE }
+
+@Composable
+private fun EmiliaMascot(modifier: Modifier = Modifier) {
+    var frame by remember { mutableStateOf(EmiliaFrame.OPEN) }
+    LaunchedEffect(Unit) {
+        var cycle = 0
+        while (true) {
+            frame = EmiliaFrame.OPEN
+            delay(2600)
+            cycle++
+            if (cycle % 4 == 0) {
+                frame = EmiliaFrame.SMILE
+                delay(900)
+            } else {
+                frame = EmiliaFrame.BLINK
+                delay(180)
+            }
+        }
+    }
+    val bitmap = when (frame) {
+        EmiliaFrame.OPEN -> NearArt.emiliaOpen()
+        EmiliaFrame.BLINK -> NearArt.emiliaBlink()
+        EmiliaFrame.SMILE -> NearArt.emiliaSmile()
+    } ?: NearArt.emiliaOpen()
+    if (bitmap != null) {
+        Image(
+            bitmap = bitmap,
+            contentDescription = null,
+            modifier = modifier
+                .height(118.dp)
+                .clip(RoundedCornerShape(18.dp)),
+            contentScale = ContentScale.Fit
+        )
     }
 }

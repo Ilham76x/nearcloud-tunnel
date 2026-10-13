@@ -316,7 +316,7 @@ private fun ServerListItem(
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 5.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .background(MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.66f))
             .height(IntrinsicSize.Min)
             .semantics {
                 if (selectedStateDescription != null) {
