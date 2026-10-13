@@ -80,7 +80,8 @@ fun MainDrawerContent(drawerState: DrawerState, onNavigate: (MainDestination) ->
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp)
+                    .height(180.dp),
+                color = MaterialTheme.colorScheme.surfaceContainer
             ) {
                 Column(
                     modifier = Modifier
@@ -91,19 +92,24 @@ fun MainDrawerContent(drawerState: DrawerState, onNavigate: (MainDestination) ->
                 ) {
                     val isDarkTheme = LocalDarkTheme.current
                     Image(
-                        painter = painterResource(R.mipmap.ic_launcher_foreground),
+                        painter = painterResource(R.drawable.ic_launcher_foreground_cloud),
                         contentDescription = null,
                         modifier = Modifier.size(120.dp),
-                        colorFilter = if (isDarkTheme) {
-                            ColorFilter.tint(Color.White, BlendMode.SrcIn)
-                        } else {
-                            null
-                        }
+                        colorFilter = ColorFilter.tint(
+                            if (isDarkTheme) Color.White else Color(0xFF0A1030),
+                            BlendMode.SrcIn
+                        )
                     )
                     Text(
                         text = stringResource(R.string.app_name),
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = stringResource(R.string.drawer_subtitle),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.padding(top = 2.dp)
                     )
                 }
             }

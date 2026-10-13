@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -49,7 +50,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.v2ray.ang.R
 import com.v2ray.ang.dto.LocateTarget
 import com.v2ray.ang.dto.entities.ProfileItem
-import com.v2ray.ang.ui.compose.ItemDivider
 import com.v2ray.ang.ui.compose.ReorderableGridItem
 import com.v2ray.ang.ui.compose.ReorderableListItem
 import com.v2ray.ang.ui.compose.colorConfigType
@@ -218,7 +218,6 @@ private fun ServerListPage(
                                 actions = actions
                             )
                         }
-                        ItemDivider()
                     }
                 } else {
                     ServerItemRow(
@@ -226,7 +225,6 @@ private fun ServerListPage(
                         isSelected = row.guid == selectedGuid,
                         actions = actions
                     )
-                    ItemDivider()
                 }
             }
         }
@@ -293,7 +291,6 @@ private fun ServerItemColumn(
             doubleColumnDisplay = doubleColumnDisplay,
             actions = actions
         )
-        ItemDivider()
     }
 }
 
@@ -317,6 +314,9 @@ private fun ServerListItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 5.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainer)
             .height(IntrinsicSize.Min)
             .semantics {
                 if (selectedStateDescription != null) {
