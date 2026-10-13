@@ -309,6 +309,11 @@
     <string name="title_pref_ui_mode_night">UI mode settings</string>
     <string name="title_pref_dynamic_color">Enable dynamic color</string>
     <string name="summary_pref_dynamic_color">Only works on Android 12+ devices</string>
+    <string name="title_pref_background_photo">Background photo</string>
+    <string name="summary_pref_background_photo">Pick a photo from your gallery as the home screen background</string>
+    <string name="title_pref_background_reset">Reset background</string>
+    <string name="title_pref_show_mascot">Emilia mascot</string>
+    <string name="summary_pref_show_mascot">Show the Emilia mascot on the home screen</string>
     <string name="title_pref_use_hev_tunnel">Use Hev TUN</string>
     <string name="summary_pref_use_hev_tunnel">When enabled, TUN will use hev-socks5-tunnel; otherwise, it will use xray-core.</string>
     <string name="title_pref_hev_tunnel_loglevel">Hev TUN log level</string>
