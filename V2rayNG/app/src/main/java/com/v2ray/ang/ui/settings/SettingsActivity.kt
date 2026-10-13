@@ -5,6 +5,9 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -21,9 +24,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -42,6 +47,7 @@ import com.v2ray.ang.handler.MmkvManager.rememberMmkvString
 import com.v2ray.ang.handler.SettingsChangeManager
 import com.v2ray.ang.root.RootManager
 import com.v2ray.ang.ui.base.BaseComponentActivity
+import com.v2ray.ang.ui.branding.NearArt
 import com.v2ray.ang.ui.compose.AppTopBar
 import com.v2ray.ang.ui.compose.CollapsiblePreferenceGroupHeader
 import com.v2ray.ang.ui.compose.NavigationBarsSpacer
@@ -53,7 +59,9 @@ import com.v2ray.ang.ui.compose.ThemeManager
 import com.v2ray.ang.ui.compose.verticalScrollbar
 import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.Utils
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SettingsActivity : BaseComponentActivity() {
 
@@ -164,7 +172,9 @@ fun SettingsScreen(
         )
     }
     var uiModeNight by rememberMmkvString(AppConfig.PREF_UI_MODE_NIGHT, "0")
-    var dynamicColor by rememberMmkvBool(AppConfig.PREF_DYNAMIC_COLOR, true)
+    var dynamicColor by rememberMmkvBool(AppConfig.PREF_DYNAMIC_COLOR, false)
+    var wallpaperCustom by rememberMmkvBool(AppConfig.PREF_WALLPAPER_CUSTOM, false)
+    var showMascot by rememberMmkvBool(AppConfig.PREF_SHOW_MASCOT, true)
 
     var ipv6Enabled by rememberMmkvBool(AppConfig.PREF_IPV6_ENABLED, false)
     var preferIpv6 by rememberMmkvBool(AppConfig.PREF_PREFER_IPV6, false)
@@ -192,6 +202,29 @@ fun SettingsScreen(
         if (!dynamicColorSupported && dynamicColor) {
             dynamicColor = false
             ThemeManager.setDynamicColorEnabled(false)
+        }
+    }
+
+    val context = LocalContext.current
+    val settingsScope = rememberCoroutineScope()
+    val wallpaperPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            settingsScope.launch {
+                val copied = withContext(Dispatchers.IO) {
+                    runCatching {
+                        context.contentResolver.openInputStream(uri)?.use { input ->
+                            NearArt.wallpaperFile(context).outputStream().use { output ->
+                                input.copyTo(output)
+                            }
+                        } ?: throw IllegalStateException("Cannot open picked image")
+                    }.isSuccess
+                }
+                if (copied) {
+                    wallpaperCustom = true
+                }
+            }
         }
     }
 
@@ -280,6 +313,34 @@ fun SettingsScreen(
                         dynamicColor = it
                         ThemeManager.setDynamicColorEnabled(it)
                     }
+                )
+                SettingsMenuItem(
+                    title = stringResource(R.string.title_pref_background_photo),
+                    subtitle = stringResource(R.string.summary_pref_background_photo),
+                    onClick = {
+                        wallpaperPicker.launch(
+                            PickVisualMediaRequest(
+                                ActivityResultContracts.PickVisualMedia.ImageOnly
+                            )
+                        )
+                    }
+                )
+                SettingsMenuItem(
+                    title = stringResource(R.string.title_pref_background_reset),
+                    onClick = {
+                        settingsScope.launch {
+                            withContext(Dispatchers.IO) {
+                                NearArt.wallpaperFile(context).delete()
+                            }
+                            wallpaperCustom = false
+                        }
+                    }
+                )
+                SettingsSwitchItem(
+                    title = stringResource(R.string.title_pref_show_mascot),
+                    summary = stringResource(R.string.summary_pref_show_mascot),
+                    checked = showMascot,
+                    onCheckedChange = { showMascot = it }
                 )
                 SettingsListItem(
                     title = stringResource(R.string.title_language),
