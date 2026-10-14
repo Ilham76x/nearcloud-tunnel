@@ -11,6 +11,35 @@
     <string name="near_upload">Upload</string>
     <string name="near_download">Download</string>
     <string name="near_test_ping">Test Ping</string>
+    <string name="near_pref_app_name">App name</string>
+    <string name="near_pref_font">Font</string>
+    <string name="near_pref_theme">Color theme</string>
+    <string-array name="near_font_select">
+        <item>Baloo 2 (chunky rounded)</item>
+        <item>Quicksand (soft)</item>
+        <item>Nunito (neat rounded)</item>
+        <item>System default</item>
+    </string-array>
+    <string-array name="near_font_select_value">
+        <item>baloo</item>
+        <item>quicksand</item>
+        <item>nunito</item>
+        <item>sistem</item>
+    </string-array>
+    <string-array name="near_theme_select">
+        <item>Near Blue</item>
+        <item>Nebula Purple</item>
+        <item>Emerald Green</item>
+        <item>Sunset Orange</item>
+        <item>AMOLED Black</item>
+    </string-array>
+    <string-array name="near_theme_select_value">
+        <item>near</item>
+        <item>nebula</item>
+        <item>zamrud</item>
+        <item>senja</item>
+        <item>amoled</item>
+    </string-array>
     <string name="app_widget_name">Near Cloud</string>
     <string name="app_tile_name">Near Cloud</string>
     <string name="app_tile_first_use">Add a profile in the app before using this feature.</string>
