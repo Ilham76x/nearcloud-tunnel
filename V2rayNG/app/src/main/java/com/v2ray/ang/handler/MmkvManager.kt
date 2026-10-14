@@ -950,6 +950,16 @@ object MmkvManager {
     }
 
     /**
+     * Checks whether a settings key has ever been written.
+     *
+     * @param key The settings key.
+     * @return True when the key exists in the settings storage.
+     */
+    fun containsSettings(key: String): Boolean {
+        return settingsStorage.containsKey(key)
+    }
+
+    /**
      * Decodes the settings string set.
      *
      * @param key The settings key.

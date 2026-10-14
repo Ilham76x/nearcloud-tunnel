@@ -476,6 +476,16 @@ object SettingsManager {
         ensureDefaultValue(AppConfig.PREF_OBSERVATORY_LEAST_LOAD_METHOD, AppConfig.OBSERVATORY_LEAST_LOAD_METHOD)
         ensureDefaultValue(AppConfig.PREF_OBSERVATORY_LEAST_LOAD_SAMPLING, AppConfig.OBSERVATORY_LEAST_LOAD_SAMPLING)
         ensureDefaultValue(AppConfig.PREF_OBSERVATORY_LEAST_LOAD_TIMEOUT, AppConfig.OBSERVATORY_LEAST_LOAD_TIMEOUT)
+        // Near Cloud Tunnel: the home-screen traffic chips read the built-in
+        // speed loop, so default it on. Written only when the key is absent,
+        // so an explicit user choice is never overridden.
+        ensureDefaultBoolValue(AppConfig.PREF_SPEED_ENABLED, true)
+    }
+
+    private fun ensureDefaultBoolValue(key: String, default: Boolean) {
+        if (!MmkvManager.containsSettings(key)) {
+            MmkvManager.encodeSettings(key, default)
+        }
     }
 
     private fun ensureDefaultValue(key: String, default: String) {
