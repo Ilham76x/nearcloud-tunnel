@@ -18,6 +18,7 @@ import com.v2ray.ang.extension.delay
 import com.v2ray.ang.extension.isComplexType
 import com.v2ray.ang.extension.matchesPattern
 import com.v2ray.ang.extension.moveItem
+import com.v2ray.ang.handler.NotificationManager
 import com.v2ray.ang.ui.base.BaseViewModel
 import com.v2ray.ang.util.LogUtil
 import kotlinx.coroutines.CancellationException
@@ -114,7 +115,21 @@ class MainViewModel(
     // ---------- Service events ----------
     init {
         collectServiceEvents()
+        collectSpeedRates()
         setupGroupTab()
+    }
+
+    private fun collectSpeedRates() {
+        viewModelScope.launch {
+            NotificationManager.speedRates.collect { (uplinkBps, downlinkBps) ->
+                _uiState.update {
+                    it.copy(
+                        trafficUplinkBps = uplinkBps,
+                        trafficDownlinkBps = downlinkBps
+                    )
+                }
+            }
+        }
     }
 
     private fun collectServiceEvents() {
