@@ -2,10 +2,12 @@ package com.v2ray.ang.ui.main
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
@@ -13,9 +15,11 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -44,7 +48,6 @@ import com.v2ray.ang.AppConfig
 import com.v2ray.ang.dto.entities.ProfileItem
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.ui.branding.NearArt
-import com.v2ray.ang.ui.compose.LocalDarkTheme
 import com.v2ray.ang.ui.compose.QRCodeDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -58,6 +61,8 @@ fun MainScreen(
 ) {
     val uiState by mainViewModel.uiState.collectAsStateWithLifecycle()
     val groups = uiState.groups
+    val selectedServers by mainViewModel.serversForGroup(uiState.selectedGroupId)
+        .collectAsStateWithLifecycle()
     val isLoading by mainViewModel.isLoading.collectAsStateWithLifecycle()
     val isRunning = uiState.isRunning
     val displayText = mainViewModel.formatStatus(uiState.status)
@@ -65,8 +70,6 @@ fun MainScreen(
     val doubleColumnDisplay = uiState.doubleColumnDisplay
     val confirmRemove = uiState.confirmRemove
     val shareQRCodeBitmap = uiState.shareQRCodeBitmap
-
-    val isDarkTheme = LocalDarkTheme.current
 
     // Home artwork state. Re-read on every resume so a wallpaper or mascot
     // change made on the settings screen applies as soon as the user returns.
@@ -90,6 +93,7 @@ fun MainScreen(
 
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    var selectedTab by remember { mutableStateOf(NearTab.HOME) }
     var showSearch by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var showDelAllConfirm by remember { mutableStateOf(false) }
@@ -225,14 +229,6 @@ fun MainScreen(
                     }
                 )
             },
-            bottomBar = {
-                MainBottomBar(
-                    displayText = displayText,
-                    isRunning = isRunning,
-                    isDarkTheme = isDarkTheme,
-                    onAction = onAction
-                )
-            },
             floatingActionButton = {},
         ) { innerPadding ->
             val layoutDirection = LocalLayoutDirection.current
@@ -243,6 +239,31 @@ fun MainScreen(
                         .fillMaxSize()
                         .padding(innerPadding)
                 ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 18.dp, bottom = 6.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        ConnectRing(
+                            isRunning = isRunning,
+                            onToggle = { onAction(MainAction.ToggleService) }
+                        )
+                        Text(
+                            text = displayText,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier
+                                .clickable { onAction(MainAction.TestCurrentServer) }
+                                .padding(top = 10.dp)
+                        )
+                        TrafficChips(
+                            uplinkBps = uiState.trafficUplinkBps,
+                            downlinkBps = uiState.trafficDownlinkBps,
+                            modifier = Modifier.padding(top = 10.dp)
+                        )
+                    }
+
                     if (groups.size > 1) {
                         GroupTabBar(
                             groups = groups,
@@ -261,7 +282,7 @@ fun MainScreen(
 
                     HorizontalPager(
                         state = pagerState,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.weight(1f),
                         userScrollEnabled = true,
                         beyondViewportPageCount = 1,
                         key = { page -> groups.getOrNull(page)?.id ?: "group-page-$page" }
@@ -290,7 +311,7 @@ fun MainScreen(
                                 start = 0.dp,
                                 top = 0.dp,
                                 end = 0.dp,
-                                bottom = 80.dp
+                                bottom = 132.dp
                             )
                         )
                     }
@@ -301,8 +322,52 @@ fun MainScreen(
             if (showMascot) {
                 EmiliaMascot(
                     modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(start = 14.dp, bottom = 96.dp)
+                        .align(Alignment.BottomEnd)
+                        .padding(end = 14.dp, bottom = 118.dp)
+                )
+            }
+
+            GlassNavBar(
+                selected = selectedTab,
+                onSelect = { tab ->
+                    when (tab) {
+                        NearTab.HOME -> selectedTab = NearTab.HOME
+                        NearTab.SERVERS -> {
+                            selectedTab = NearTab.SERVERS
+                            scope.launch {
+                                lazyListStates[uiState.selectedGroupId]?.animateScrollToItem(0)
+                                lazyGridStates[uiState.selectedGroupId]?.animateScrollToItem(0)
+                            }
+                        }
+                        NearTab.STATS -> selectedTab = NearTab.STATS
+                        NearTab.SETTINGS -> onNavigate(MainDestination.Settings)
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 10.dp)
+            )
+
+            if (selectedTab == NearTab.STATS) {
+                val selectedProfile = selectedServers.firstOrNull { it.guid == selectedGuid }
+                val profileAddress = selectedProfile?.profile?.let { profile ->
+                    val server = profile.server
+                    val port = profile.serverPort
+                    if (!server.isNullOrBlank() && !port.isNullOrBlank()) {
+                        "$server:$port"
+                    } else {
+                        server
+                    }
+                }
+                StatsOverlay(
+                    statusText = displayText,
+                    profileName = selectedProfile?.profile?.remarks,
+                    profileAddress = profileAddress,
+                    delayMillis = selectedProfile?.testDelayMillis ?: 0,
+                    uplinkBps = uiState.trafficUplinkBps,
+                    downlinkBps = uiState.trafficDownlinkBps,
+                    onTest = { onAction(MainAction.TestCurrentServer) },
+                    onClose = { selectedTab = NearTab.HOME }
                 )
             }
         }

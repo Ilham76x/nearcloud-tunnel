@@ -22,6 +22,9 @@ import com.v2ray.ang.util.LogUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.math.min
@@ -38,6 +41,17 @@ object NotificationManager {
     private var mBuilder: NotificationCompat.Builder? = null
     private var speedNotificationJob: Job? = null
     private var mNotificationManager: NotificationManager? = null
+
+    private val _speedRates = MutableStateFlow(0L to 0L)
+
+    /**
+     * Latest proxy traffic rates in bytes per second (uplink, downlink).
+     * This object stays the only caller of
+     * CoreServiceManager.queryAllOutboundTrafficStats(); the flow only
+     * republishes the per-second rates the existing speed loop already
+     * computed, for the main UI traffic chips.
+     */
+    val speedRates: StateFlow<Pair<Long, Long>> = _speedRates.asStateFlow()
 
     /**
      * Starts the speed notification.
@@ -146,6 +160,7 @@ object NotificationManager {
         speedNotificationJob?.let {
             it.cancel()
             speedNotificationJob = null
+            _speedRates.value = 0L to 0L
             updateNotification("", 0, 0)
         }
     }
@@ -266,6 +281,10 @@ object NotificationManager {
         val proxyTotal = proxyUplink + proxyDownlink
         val directTotal = directUplink + directDownlink
         val zeroSpeed = proxyTotal + directTotal == 0L
+
+        _speedRates.value = (proxyUplink / sinceLastQueryInSeconds).toLong() to
+            (proxyDownlink / sinceLastQueryInSeconds).toLong()
+
         if (!zeroSpeed || !lastZeroSpeed) {
             val text = StringBuilder()
             appendSpeedString(
