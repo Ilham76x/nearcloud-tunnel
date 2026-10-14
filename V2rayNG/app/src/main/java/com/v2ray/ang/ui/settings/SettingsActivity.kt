@@ -175,6 +175,9 @@ fun SettingsScreen(
     var dynamicColor by rememberMmkvBool(AppConfig.PREF_DYNAMIC_COLOR, false)
     var wallpaperCustom by rememberMmkvBool(AppConfig.PREF_WALLPAPER_CUSTOM, false)
     var showMascot by rememberMmkvBool(AppConfig.PREF_SHOW_MASCOT, true)
+    var customAppName by rememberMmkvString(AppConfig.PREF_CUSTOM_APP_NAME, "")
+    var fontStyle by rememberMmkvString(AppConfig.PREF_FONT_STYLE, "baloo")
+    var themePreset by rememberMmkvString(AppConfig.PREF_THEME_PRESET, "near")
 
     var ipv6Enabled by rememberMmkvBool(AppConfig.PREF_IPV6_ENABLED, false)
     var preferIpv6 by rememberMmkvBool(AppConfig.PREF_PREFER_IPV6, false)
@@ -230,6 +233,10 @@ fun SettingsScreen(
 
     val languageEntries = stringArrayResource(R.array.language_select).toList()
     val languageValues = stringArrayResource(R.array.language_select_value).toList()
+    val fontEntries = stringArrayResource(R.array.near_font_select).toList()
+    val fontValues = stringArrayResource(R.array.near_font_select_value).toList()
+    val themeEntries = stringArrayResource(R.array.near_theme_select).toList()
+    val themeValues = stringArrayResource(R.array.near_theme_select_value).toList()
     val uiModeNightEntries = stringArrayResource(R.array.ui_mode_night).toList()
     val uiModeNightValues = stringArrayResource(R.array.ui_mode_night_value).toList()
     val bypassLanEntries = stringArrayResource(R.array.vpn_bypass_lan).toList()
@@ -341,6 +348,31 @@ fun SettingsScreen(
                     summary = stringResource(R.string.summary_pref_show_mascot),
                     checked = showMascot,
                     onCheckedChange = { showMascot = it }
+                )
+                SettingsEditItem(
+                    title = stringResource(R.string.near_pref_app_name),
+                    value = customAppName,
+                    onValueChanged = { customAppName = it }
+                )
+                SettingsListItem(
+                    title = stringResource(R.string.near_pref_font),
+                    entries = fontEntries,
+                    values = fontValues,
+                    selectedValue = fontStyle,
+                    onSelected = {
+                        fontStyle = it
+                        ThemeManager.setFontStyle(it)
+                    }
+                )
+                SettingsListItem(
+                    title = stringResource(R.string.near_pref_theme),
+                    entries = themeEntries,
+                    values = themeValues,
+                    selectedValue = themePreset,
+                    onSelected = {
+                        themePreset = it
+                        ThemeManager.setThemePreset(it)
+                    }
                 )
                 SettingsListItem(
                     title = stringResource(R.string.title_language),
