@@ -179,26 +179,26 @@ fun AppTheme(
         darkTheme -> DarkColor
         else -> LightColor
     }
-    val quicksand = remember { NearFont.quicksand(context) }
-    val appTypography = remember(quicksand) {
-        if (quicksand != null) {
+    val appFont = remember { NearFont.baloo(context) }
+    val appTypography = remember(appFont) {
+        if (appFont != null) {
             val defaults = Typography()
             Typography(
-                displayLarge = defaults.displayLarge.copy(fontFamily = quicksand),
-                displayMedium = defaults.displayMedium.copy(fontFamily = quicksand),
-                displaySmall = defaults.displaySmall.copy(fontFamily = quicksand),
-                headlineLarge = defaults.headlineLarge.copy(fontFamily = quicksand),
-                headlineMedium = defaults.headlineMedium.copy(fontFamily = quicksand),
-                headlineSmall = defaults.headlineSmall.copy(fontFamily = quicksand),
-                titleLarge = defaults.titleLarge.copy(fontFamily = quicksand),
-                titleMedium = defaults.titleMedium.copy(fontFamily = quicksand),
-                titleSmall = defaults.titleSmall.copy(fontFamily = quicksand),
-                bodyLarge = defaults.bodyLarge.copy(fontFamily = quicksand),
-                bodyMedium = defaults.bodyMedium.copy(fontFamily = quicksand),
-                bodySmall = defaults.bodySmall.copy(fontFamily = quicksand),
-                labelLarge = defaults.labelLarge.copy(fontFamily = quicksand),
-                labelMedium = defaults.labelMedium.copy(fontFamily = quicksand),
-                labelSmall = defaults.labelSmall.copy(fontFamily = quicksand)
+                displayLarge = defaults.displayLarge.copy(fontFamily = appFont),
+                displayMedium = defaults.displayMedium.copy(fontFamily = appFont),
+                displaySmall = defaults.displaySmall.copy(fontFamily = appFont),
+                headlineLarge = defaults.headlineLarge.copy(fontFamily = appFont),
+                headlineMedium = defaults.headlineMedium.copy(fontFamily = appFont),
+                headlineSmall = defaults.headlineSmall.copy(fontFamily = appFont),
+                titleLarge = defaults.titleLarge.copy(fontFamily = appFont),
+                titleMedium = defaults.titleMedium.copy(fontFamily = appFont),
+                titleSmall = defaults.titleSmall.copy(fontFamily = appFont),
+                bodyLarge = defaults.bodyLarge.copy(fontFamily = appFont),
+                bodyMedium = defaults.bodyMedium.copy(fontFamily = appFont),
+                bodySmall = defaults.bodySmall.copy(fontFamily = appFont),
+                labelLarge = defaults.labelLarge.copy(fontFamily = appFont),
+                labelMedium = defaults.labelMedium.copy(fontFamily = appFont),
+                labelSmall = defaults.labelSmall.copy(fontFamily = appFont)
             )
         } else {
             Typography()

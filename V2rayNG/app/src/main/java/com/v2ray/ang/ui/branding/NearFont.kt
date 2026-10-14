@@ -11,39 +11,51 @@ import java.io.File
 
 /**
  * Bundled Near Cloud typeface (the base64 payloads in the Font*.kt files of
- * this package): a variable-weight Quicksand TTF that is decoded once,
- * written to app-private storage, and then cached as a [FontFamily] for the
- * lifetime of the process. Returns null when decoding fails so callers can
- * fall back to the platform default typeface.
+ * this package): static Baloo 2 files (Medium 500 and Bold 700) that are
+ * decoded once, written to app-private storage, and then cached as a
+ * [FontFamily] for the lifetime of the process. Returns null when decoding
+ * fails so callers can fall back to the platform default typeface.
  */
 object NearFont {
 
-    private const val QUICKSAND_FILE = "quicksand.ttf"
+    private const val BALOO_500_FILE = "baloo-500.ttf"
+    private const val BALOO_700_FILE = "baloo-700.ttf"
 
-    private var quicksandFamily: FontFamily? = null
+    private var balooFamily: FontFamily? = null
 
-    fun quicksand(context: Context): FontFamily? {
-        quicksandFamily?.let { return it }
+    fun baloo(context: Context): FontFamily? {
+        balooFamily?.let { return it }
         val family = try {
-            val bytes = Base64.decode(
-                FONT_QUICKSAND_B64_PART1 + FONT_QUICKSAND_B64_PART2 + FONT_QUICKSAND_B64_PART3,
-                Base64.DEFAULT
+            val mediumFile = decodeToFile(
+                context,
+                BALOO_500_B64_PART1 + BALOO_500_B64_PART2,
+                BALOO_500_FILE
             )
-            val file = File(context.filesDir, QUICKSAND_FILE)
-            if (!file.exists() || file.length() != bytes.size.toLong()) {
-                file.writeBytes(bytes)
-            }
+            val boldFile = decodeToFile(
+                context,
+                BALOO_700_B64_PART1 + BALOO_700_B64_PART2,
+                BALOO_700_FILE
+            )
             FontFamily(
-                Font(file, FontWeight.Normal),
-                Font(file, FontWeight.Medium),
-                Font(file, FontWeight.SemiBold),
-                Font(file, FontWeight.Bold)
+                Font(mediumFile, FontWeight.Normal),
+                Font(mediumFile, FontWeight.Medium),
+                Font(boldFile, FontWeight.SemiBold),
+                Font(boldFile, FontWeight.Bold)
             )
         } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "NearFont: failed to load bundled Quicksand font", e)
+            LogUtil.e(AppConfig.TAG, "NearFont: failed to load bundled Baloo 2 font", e)
             null
         }
-        quicksandFamily = family
+        balooFamily = family
         return family
+    }
+
+    private fun decodeToFile(context: Context, base64: String, fileName: String): File {
+        val bytes = Base64.decode(base64, Base64.DEFAULT)
+        val file = File(context.filesDir, fileName)
+        if (!file.exists() || file.length() != bytes.size.toLong()) {
+            file.writeBytes(bytes)
+        }
+        return file
     }
 }
