@@ -30,13 +30,13 @@ object NearArt {
     fun wallpaperFile(context: Context): File = File(context.filesDir, CUSTOM_WALLPAPER_FILE)
 
     fun emiliaOpen(): ImageBitmap? =
-        emiliaOpen ?: decodeBase64(EMILIA_OPEN_B64)?.also { emiliaOpen = it }
+        emiliaOpen ?: decodeBase64(EMILIA_OPEN_B64_PART1 + EMILIA_OPEN_B64_PART2)?.also { emiliaOpen = it }
 
     fun emiliaBlink(): ImageBitmap? =
-        emiliaBlink ?: decodeBase64(EMILIA_BLINK_B64)?.also { emiliaBlink = it }
+        emiliaBlink ?: decodeBase64(EMILIA_BLINK_B64_PART1 + EMILIA_BLINK_B64_PART2)?.also { emiliaBlink = it }
 
     fun emiliaSmile(): ImageBitmap? =
-        emiliaSmile ?: decodeBase64(EMILIA_SMILE_B64)?.also { emiliaSmile = it }
+        emiliaSmile ?: decodeBase64(EMILIA_SMILE_B64_PART1 + EMILIA_SMILE_B64_PART2)?.also { emiliaSmile = it }
 
     fun bgNight(): ImageBitmap? =
         bgNight ?: decodeBase64(BG_NIGHT_B64_PART1 + BG_NIGHT_B64_PART2)?.also { bgNight = it }

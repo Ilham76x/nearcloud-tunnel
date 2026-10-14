@@ -6,6 +6,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -16,6 +17,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -23,6 +25,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.handler.MmkvManager
+import com.v2ray.ang.ui.branding.NearFont
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -176,6 +179,31 @@ fun AppTheme(
         darkTheme -> DarkColor
         else -> LightColor
     }
+    val quicksand = remember { NearFont.quicksand(context) }
+    val appTypography = remember(quicksand) {
+        if (quicksand != null) {
+            val defaults = Typography()
+            Typography(
+                displayLarge = defaults.displayLarge.copy(fontFamily = quicksand),
+                displayMedium = defaults.displayMedium.copy(fontFamily = quicksand),
+                displaySmall = defaults.displaySmall.copy(fontFamily = quicksand),
+                headlineLarge = defaults.headlineLarge.copy(fontFamily = quicksand),
+                headlineMedium = defaults.headlineMedium.copy(fontFamily = quicksand),
+                headlineSmall = defaults.headlineSmall.copy(fontFamily = quicksand),
+                titleLarge = defaults.titleLarge.copy(fontFamily = quicksand),
+                titleMedium = defaults.titleMedium.copy(fontFamily = quicksand),
+                titleSmall = defaults.titleSmall.copy(fontFamily = quicksand),
+                bodyLarge = defaults.bodyLarge.copy(fontFamily = quicksand),
+                bodyMedium = defaults.bodyMedium.copy(fontFamily = quicksand),
+                bodySmall = defaults.bodySmall.copy(fontFamily = quicksand),
+                labelLarge = defaults.labelLarge.copy(fontFamily = quicksand),
+                labelMedium = defaults.labelMedium.copy(fontFamily = quicksand),
+                labelSmall = defaults.labelSmall.copy(fontFamily = quicksand)
+            )
+        } else {
+            Typography()
+        }
+    }
     val snackbarController = rememberAppSnackbarController()
 
     val view = LocalView.current
@@ -195,7 +223,8 @@ fun AppTheme(
         LocalAppSnackbar provides snackbarController
     ) {
         MaterialTheme(
-            colorScheme = colorScheme
+            colorScheme = colorScheme,
+            typography = appTypography
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 AppSnackbarBridge(controller = snackbarController)
