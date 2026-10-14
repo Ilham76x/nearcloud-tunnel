@@ -50,6 +50,67 @@ object NearFont {
         return family
     }
 
+    private var quicksandFamily: FontFamily? = null
+    private var nunitoFamily: FontFamily? = null
+
+    /** Bundled typeface for a Settings font-style key; null = system default. */
+    fun family(context: Context, style: String): FontFamily? = when (style) {
+        "quicksand" -> quicksand(context)
+        "nunito" -> nunito(context)
+        "sistem" -> null
+        else -> baloo(context)
+    }
+
+    fun quicksand(context: Context): FontFamily? {
+        quicksandFamily?.let { return it }
+        val family = try {
+            val file = decodeToFile(
+                context,
+                FONT_QUICKSAND_B64_PART1 + FONT_QUICKSAND_B64_PART2 +
+                    FONT_QUICKSAND_B64_PART3,
+                "quicksand.ttf"
+            )
+            FontFamily(
+                Font(file, FontWeight.Normal),
+                Font(file, FontWeight.Medium),
+                Font(file, FontWeight.SemiBold),
+                Font(file, FontWeight.Bold)
+            )
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "NearFont: failed to load bundled Quicksand font", e)
+            null
+        }
+        quicksandFamily = family
+        return family
+    }
+
+    fun nunito(context: Context): FontFamily? {
+        nunitoFamily?.let { return it }
+        val family = try {
+            val mediumFile = decodeToFile(
+                context,
+                NUNITO_500_B64_PART1 + NUNITO_500_B64_PART2,
+                "nunito-500.ttf"
+            )
+            val boldFile = decodeToFile(
+                context,
+                NUNITO_700_B64_PART1 + NUNITO_700_B64_PART2,
+                "nunito-700.ttf"
+            )
+            FontFamily(
+                Font(mediumFile, FontWeight.Normal),
+                Font(mediumFile, FontWeight.Medium),
+                Font(boldFile, FontWeight.SemiBold),
+                Font(boldFile, FontWeight.Bold)
+            )
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "NearFont: failed to load bundled Nunito font", e)
+            null
+        }
+        nunitoFamily = family
+        return family
+    }
+
     private fun decodeToFile(context: Context, base64: String, fileName: String): File {
         val bytes = Base64.decode(base64, Base64.DEFAULT)
         val file = File(context.filesDir, fileName)
