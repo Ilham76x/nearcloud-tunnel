@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Near Cloud launcher foreground: Akatsuki-style red cloud with a black
+  outline and its signature swirl, hand-drawn for near. The artwork is
+  kept inside the adaptive-icon safe zone (x 22..87, y 30..74 of the
+  108 viewport) so no launcher mask (circle / squircle / rounded square)
+  can crop the cloud.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group android:translateY="2">
+        <path
+            android:fillColor="#E60012"
+            android:strokeColor="#000000"
+            android:strokeWidth="4.2"
+            android:strokeLineJoin="round"
+            android:pathData="M27,67 C33,70,40,70,45,67.5 C50,65,56,69.5,62,67.5 C68,65.5,74,69,79,66.5 C85,64,86.5,55,82.5,50 C81,42,73,38,66,41.5 C63,33,53,30,46,35.5 C40,31.5,31,34.5,29.5,42.5 C23.5,45.5,22.5,55,25,61.5 C25.8,64.5,26.2,66,27,67 Z" />
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#000000"
+            android:strokeWidth="2.6"
+            android:strokeLineCap="round"
+            android:pathData="M35,57 C28.5,54.5,28,45.5,34.5,43.5 C39.5,42,43.5,46,42,50.5 C40.8,53.8,37,54.2,35.8,51.5" />
+    </group>
+</vector>
