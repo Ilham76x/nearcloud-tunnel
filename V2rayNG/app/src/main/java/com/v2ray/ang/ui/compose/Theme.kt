@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
@@ -104,6 +105,100 @@ private val DarkColor = darkColorScheme(
     surfaceContainerHighest = Color(0xFF24376F), // Highest Navy
 )
 
+/** Dark color scheme for a Settings theme-preset key. */
+private fun darkPresetScheme(preset: String): ColorScheme = when (preset) {
+    "nebula" -> DarkColor.copy(
+        primary = Color(0xFFA78BFA),
+        onPrimary = Color(0xFF2A1A5E),
+        primaryContainer = Color(0xFF3D2A73),
+        onPrimaryContainer = Color(0xFFEAE4FF),
+        secondary = Color(0xFF22D3EE),
+        onSecondary = Color(0xFF05303A),
+        secondaryContainer = Color(0xFF0E4A5F),
+        onSecondaryContainer = Color(0xFFC9F3FF),
+        background = Color(0xFF150A2E),
+        onBackground = Color(0xFFEDE9FF),
+        surface = Color(0xFF1D1140),
+        onSurface = Color(0xFFEDE9FF),
+        surfaceVariant = Color(0xFF2E1E5E),
+        onSurfaceVariant = Color(0xFFC4B5E8),
+        outline = Color(0xFF6D5BA6),
+        outlineVariant = Color(0xFF3A2A6E),
+        surfaceTint = Color(0xFFA78BFA),
+        inversePrimary = Color(0xFF7C5CD6),
+        surfaceContainerLowest = Color(0xFF0D0619),
+        surfaceContainerLow = Color(0xFF170B31),
+        surfaceContainer = Color(0xFF2A1B57),
+        surfaceContainerHigh = Color(0xFF35236B),
+        surfaceContainerHighest = Color(0xFF412C80)
+    )
+
+    "zamrud" -> DarkColor.copy(
+        primary = Color(0xFF34D399),
+        onPrimary = Color(0xFF00382A),
+        primaryContainer = Color(0xFF065F46),
+        onPrimaryContainer = Color(0xFFB7F4DA),
+        secondary = Color(0xFF2DD4BF),
+        onSecondary = Color(0xFF00382E),
+        secondaryContainer = Color(0xFF0B4A41),
+        onSecondaryContainer = Color(0xFFB9FFF2),
+        background = Color(0xFF04150F),
+        onBackground = Color(0xFFDCF5EA),
+        surface = Color(0xFF08231B),
+        onSurface = Color(0xFFDCF5EA),
+        surfaceVariant = Color(0xFF123527),
+        onSurfaceVariant = Color(0xFFA7CDBE),
+        outline = Color(0xFF3E6B58),
+        outlineVariant = Color(0xFF1D4234),
+        surfaceTint = Color(0xFF34D399),
+        inversePrimary = Color(0xFF0E9F6E),
+        surfaceContainerLowest = Color(0xFF020D09),
+        surfaceContainerLow = Color(0xFF051A12),
+        surfaceContainer = Color(0xFF0E3527),
+        surfaceContainerHigh = Color(0xFF144231),
+        surfaceContainerHighest = Color(0xFF1B4F3B)
+    )
+
+    "senja" -> DarkColor.copy(
+        primary = Color(0xFFFB923C),
+        onPrimary = Color(0xFF431407),
+        primaryContainer = Color(0xFF7C2D12),
+        onPrimaryContainer = Color(0xFFFFE3C2),
+        secondary = Color(0xFFF87171),
+        onSecondary = Color(0xFF450A0A),
+        secondaryContainer = Color(0xFF6E1A1A),
+        onSecondaryContainer = Color(0xFFFFD9D9),
+        background = Color(0xFF170803),
+        onBackground = Color(0xFFFFEDDE),
+        surface = Color(0xFF241009),
+        onSurface = Color(0xFFFFEDDE),
+        surfaceVariant = Color(0xFF3A1E10),
+        onSurfaceVariant = Color(0xFFE3BFA3),
+        outline = Color(0xFF8A5A3B),
+        outlineVariant = Color(0xFF4A2C1A),
+        surfaceTint = Color(0xFFFB923C),
+        inversePrimary = Color(0xFFEA580C),
+        surfaceContainerLowest = Color(0xFF0E0502),
+        surfaceContainerLow = Color(0xFF1B0B05),
+        surfaceContainer = Color(0xFF33190C),
+        surfaceContainerHigh = Color(0xFF40200F),
+        surfaceContainerHighest = Color(0xFF4F2813)
+    )
+
+    "amoled" -> DarkColor.copy(
+        background = Color(0xFF000000),
+        surface = Color(0xFF050505),
+        surfaceVariant = Color(0xFF141414),
+        surfaceContainerLowest = Color(0xFF000000),
+        surfaceContainerLow = Color(0xFF030303),
+        surfaceContainer = Color(0xFF101010),
+        surfaceContainerHigh = Color(0xFF181818),
+        surfaceContainerHighest = Color(0xFF222222)
+    )
+
+    else -> DarkColor
+}
+
 // Semantic Colors
 val colorPing = Color(0xFF009966) // Green
 val colorPingRed = Color(0xFFFF0099) // Pink Red
@@ -144,11 +239,35 @@ object ThemeManager {
         _dynamicColorEnabled.value = enabled
     }
 
+    private val _fontStyle = MutableStateFlow(
+        MmkvManager.decodeSettingsString(AppConfig.PREF_FONT_STYLE, "baloo") ?: "baloo"
+    )
+    val fontStyle: StateFlow<String> = _fontStyle.asStateFlow()
+
+    private val _themePreset = MutableStateFlow(
+        MmkvManager.decodeSettingsString(AppConfig.PREF_THEME_PRESET, "near") ?: "near"
+    )
+    val themePreset: StateFlow<String> = _themePreset.asStateFlow()
+
+    fun setFontStyle(style: String) {
+        MmkvManager.encodeSettings(AppConfig.PREF_FONT_STYLE, style)
+        _fontStyle.value = style
+    }
+
+    fun setThemePreset(preset: String) {
+        MmkvManager.encodeSettings(AppConfig.PREF_THEME_PRESET, preset)
+        _themePreset.value = preset
+    }
+
     fun refresh() {
         _themeMode.value =
             MmkvManager.decodeSettingsString(AppConfig.PREF_UI_MODE_NIGHT, "0") ?: "0"
         _dynamicColorEnabled.value =
             MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR, false)
+        _fontStyle.value =
+            MmkvManager.decodeSettingsString(AppConfig.PREF_FONT_STYLE, "baloo") ?: "baloo"
+        _themePreset.value =
+            MmkvManager.decodeSettingsString(AppConfig.PREF_THEME_PRESET, "near") ?: "near"
     }
 }
 
@@ -170,16 +289,18 @@ fun AppTheme(
     content: @Composable () -> Unit
 ) {
     val dynamicColor by ThemeManager.dynamicColorEnabled.collectAsState()
+    val fontStyle by ThemeManager.fontStyle.collectAsState()
+    val themePreset by ThemeManager.themePreset.collectAsState()
     val context = LocalContext.current
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> DarkColor
+        darkTheme -> darkPresetScheme(themePreset)
         else -> LightColor
     }
-    val appFont = remember { NearFont.baloo(context) }
+    val appFont = remember(fontStyle) { NearFont.family(context, fontStyle) }
     val appTypography = remember(appFont) {
         if (appFont != null) {
             val defaults = Typography()
